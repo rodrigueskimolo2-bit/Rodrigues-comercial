@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-AO">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rodrigues Comercial</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#151515}
+header{background:#111;color:#fff;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.logo{font-size:22px;font-weight:800}.btn{border:0;border-radius:9px;padding:11px 15px;cursor:pointer;font-weight:700}
+.cart{background:#fff;color:#111}.hero{padding:55px 6%;background:#222;color:#fff}.hero h1{font-size:42px;margin:0 0 10px}.hero p{max-width:650px}
+nav{padding:15px 6%;background:#fff;display:flex;gap:8px;flex-wrap:wrap}.cat{border:1px solid #ddd;background:#fff;border-radius:20px;padding:9px 16px}.cat.active{background:#111;color:#fff}
+main{padding:25px 6%}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 3px 12px #0001}.pic{height:220px;background:#eaeaea;display:flex;align-items:center;justify-content:center;font-size:55px}.pic img{width:100%;height:100%;object-fit:cover}.info{padding:15px}.price{font-size:20px;font-weight:800;margin:9px 0}.add{width:100%;background:#111;color:#fff}.drawer{position:fixed;right:-430px;top:0;width:min(430px,100%);height:100%;background:#fff;z-index:20;padding:20px;overflow:auto;transition:.25s;box-shadow:-4px 0 18px #0003}.drawer.open{right:0}.close{float:right;background:none;border:0;font-size:28px}.item{padding:12px 0;border-bottom:1px solid #ddd}.wa{display:block;background:#25d366;color:#fff;text-decoration:none;text-align:center;padding:14px;border-radius:9px;font-weight:800}
+footer{background:#111;color:#fff;padding:30px 6%;margin-top:30px}
+</style>
+</head>
+<body>
+<header><div class="logo">RODRIGUES COMERCIAL</div><button class="btn cart" onclick="openCart()">🛒 Carrinho (<span id="count">0</span>)</button></header>
+<section class="hero"><h1>Rodrigues Comercial</h1><p>Roupas, ténis e produtos de beleza. Escolhe os teus produtos e envia o pedido pelo WhatsApp.</p></section>
+<nav><button class="cat active" onclick="showCat('Todos',this)">Todos</button><button class="cat" onclick="showCat('Roupas',this)">Roupas</button><button class="cat" onclick="showCat('Ténis',this)">Ténis</button><button class="cat" onclick="showCat('Beleza',this)">Beleza</button></nav>
+<main><div id="products" class="grid"></div></main>
+<aside id="drawer" class="drawer"><button class="close" onclick="closeCart()">×</button><h2>🛒 Carrinho</h2><div id="cartItems"></div><h3>Total: <span id="total">0</span> Kz</h3><a id="wa" class="wa" target="_blank">Finalizar pelo WhatsApp</a></aside>
+<footer><b>Rodrigues Comercial</b><br><br>WhatsApp: +244 957 490 637</footer>
+<script>
+const DEFAULT=[{id:1,name:"Camisola Premium",cat:"Roupas",price:15000,stock:10,emoji:"👕"},{id:2,name:"Ténis Casual",cat:"Ténis",price:35000,stock:8,emoji:"👟"},{id:3,name:"Kit de Beleza",cat:"Beleza",price:25000,stock:12,emoji:"💄"}];
+let products=JSON.parse(localStorage.getItem("rc_products")||"null")||DEFAULT,cart=[];
+const money=n=>Number(n).toLocaleString("pt-AO");
+function render(arr=products){document.querySelector("#products").innerHTML=arr.map(p=>`<article class="card"><div class="pic">${p.photo?`<img src="${p.photo}">`:p.emoji||"🛍️"}</div><div class="info"><h3>${p.name}</h3><small>${p.cat}</small><div class="price">${money(p.price)} Kz</div><small>Stock: ${p.stock??"—"}</small><br><br><button class="btn add" onclick="add(${p.id})">Adicionar ao carrinho</button></div></article>`).join("")}
+function showCat(c,b){document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));b.classList.add("active");render(c==="Todos"?products:products.filter(p=>p.cat===c))}
+function add(id){let p=products.find(x=>x.id===id),i=cart.find(x=>x.id===id);if(!p)return;if(i)i.qty++;else cart.push({id,qty:1});update();openCart()}
+function change(id,d){let i=cart.find(x=>x.id===id);if(!i)return;i.qty+=d;if(i.qty<1)cart=cart.filter(x=>x.id!==id);update()}
+function update(){document.querySelector("#count").textContent=cart.reduce((a,x)=>a+x.qty,0);let total=0;document.querySelector("#cartItems").innerHTML=cart.length?cart.map(i=>{let p=products.find(x=>x.id===i.id),s=p.price*i.qty;total+=s;return `<div class="item"><b>${p.name}</b><br>${money(p.price)} Kz × ${i.qty}<br><button onclick="change(${p.id},-1)">−</button> <button onclick="change(${p.id},1)">+</button></div>`}).join(""):"<p>O carrinho está vazio.</p>";document.querySelector("#total").textContent=money(total);let m="Olá, Rodrigues Comercial! Quero fazer este pedido:%0A%0A";cart.forEach(i=>{let p=products.find(x=>x.id===i.id);m+=`• ${p.name} — ${i.qty} x ${money(p.price)} Kz%0A`});m+=`%0ATotal: ${money(total)} Kz`;document.querySelector("#wa").href="https://wa.me/244957490637?text="+m}
+function openCart(){document.querySelector("#drawer").classList.add("open")}function closeCart(){document.querySelector("#drawer").classList.remove("open")}
+render();update();
+</script>
+</body></html>
